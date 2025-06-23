@@ -1,0 +1,7 @@
+- type: entity
+  id: AdminInstantEffectGhostBooLights
+  suffix: GhostBooLights
+  parent: AdminInstantEffectBase
+  components:
+  - type: GhostBooLightsOnTrigger
+    range: 10
