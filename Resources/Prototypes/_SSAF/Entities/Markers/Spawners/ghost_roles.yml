@@ -1,0 +1,22 @@
+- type: entity
+  id: SpawnPointParasite
+  name: ghost role spawn point
+  suffix: parasite
+  parent: MarkerBase
+  components:
+  - type: GhostRole
+    name: The Parasite
+    description: Infect a host, feed, then spread your young
+    rules: ghost-role-information-freeagent-rules
+    mindRoles:
+    - MindRoleGhostRoleFreeAgent
+    raffle:
+      settings: default
+  - type: GhostRoleMobSpawner
+    prototype: MobParasite
+  - type: Sprite
+    sprite: Markers/jobs.rsi
+    layers:
+    - state: green
+    - sprite: Mobs/Animals/regalrat.rsi
+      state: icon

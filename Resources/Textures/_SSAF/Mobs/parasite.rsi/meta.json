@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "critical"
+        },
+        {
+            "name": "dead"
+        },
+        {
+            "name": "icon"
+        },
+        {
+            "name": "parasite",
+            "directions": 4
+        }
+    ]
+}
