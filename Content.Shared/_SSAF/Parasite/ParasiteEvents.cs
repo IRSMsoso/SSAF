@@ -9,5 +9,10 @@ public sealed partial class ParasiteInfectHostActionEvent : EntityTargetActionEv
 {
 }
 
+public sealed partial class ParasiteLoseHostEvent : EntityEventArgs
+{
+}
+
 [Serializable, NetSerializable]
 public sealed partial class InfectHostDoAfterEvent : SimpleDoAfterEvent { }
+

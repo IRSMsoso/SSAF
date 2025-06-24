@@ -1,6 +1,7 @@
 using Content.Server._SSAF.Parasite.Components;
 using Content.Server.Body.Components;
 using Content.Server.Popups;
+using Content.Shared._SSAF.Parasite;
 using Content.Shared.Coordinates;
 using Content.Shared.Popups;
 using Robust.Server.Containers;
@@ -40,7 +41,9 @@ public sealed class ParasiteHostSystem : EntitySystem
     {
         if (component.ParasiteContainer.Count > 0)
         {
-            _popup.PopupCoordinates("A grotesque looking worm crawls out", component.ParasiteContainer.ContainedEntities[0].ToCoordinates(), PopupType.MediumCaution);
+            var parasite = component.ParasiteContainer.ContainedEntities[0];
+            _popup.PopupCoordinates("A grotesque looking worm crawls out", parasite.ToCoordinates(), PopupType.MediumCaution);
+            RaiseLocalEvent(parasite, new ParasiteLoseHostEvent());
         }
         _container.EmptyContainer(component.ParasiteContainer);
     }
