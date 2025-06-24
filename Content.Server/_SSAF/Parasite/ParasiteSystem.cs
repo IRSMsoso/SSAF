@@ -1,5 +1,6 @@
 using Content.Server._SSAF.Parasite.Components;
 using Content.Server.DoAfter;
+using Content.Server.Drunk;
 using Content.Server.Popups;
 using Content.Shared._SSAF.Parasite;
 using Content.Shared.Actions;
@@ -19,6 +20,8 @@ public sealed class ParasiteSystem : EntitySystem
     [Dependency] private readonly PopupSystem _popup = default!;
     [Dependency] private readonly DoAfterSystem _doAfter = default!;
     [Dependency] private readonly ContainerSystem _container = default!;
+    [Dependency] private readonly DrunkSystem _drunk = default!;
+    [Dependency] private readonly DrunkSpikeSystem _drunkSpike = default!;
 
     private EntityQuery<ParasiteHostComponent> parasiteHostQuery;
 
@@ -29,6 +32,7 @@ public sealed class ParasiteSystem : EntitySystem
         SubscribeLocalEvent<ParasiteComponent, MapInitEvent>(OnInit);
         SubscribeLocalEvent<ParasiteComponent, ComponentRemove>(OnComponentRemove);
         SubscribeLocalEvent<ParasiteComponent, ParasiteInfectHostActionEvent>(OnInfectHost);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteMakeDrunkActionEvent>(OnMakeDrunk);
         SubscribeLocalEvent<ParasiteComponent, InfectHostDoAfterEvent>(OnDoAfterInfestHost);
         SubscribeLocalEvent<ParasiteComponent, ParasiteLoseHostEvent>(OnLoseHost);
     }
@@ -59,6 +63,18 @@ public sealed class ParasiteSystem : EntitySystem
         _popup.PopupEntity("You start worming your way under your target's skin", uid, uid);
     }
 
+    private void OnMakeDrunk(EntityUid uid, ParasiteComponent component, ParasiteMakeDrunkActionEvent args)
+    {
+        if (!_container.TryGetContainingContainer(uid, out var container))
+            return;
+
+        _drunkSpike.TryDrunkSpike(container.Owner, component.makeDrunkTime);
+
+        _actions.SetCooldown(component.makeDrunkActionEntity, component.makeDrunkCooldownTime);
+
+        _popup.PopupEntity("You feel woozy all of a sudden", container.Owner, container.Owner);
+    }
+
     private void OnDoAfterInfestHost(EntityUid uid, ParasiteComponent component, InfectHostDoAfterEvent args)
     {
         if (args.Handled || args.Cancelled)
@@ -85,11 +101,14 @@ public sealed class ParasiteSystem : EntitySystem
 
         _popup.PopupEntity("You worm your way into your new host", uid, uid);
         _actions.RemoveAction(component.InfectHostActionEntity);
+        _actions.AddAction(uid, ref component.makeDrunkActionEntity, component.makeDrunkAction);
     }
 
     private void OnLoseHost(EntityUid uid, ParasiteComponent component, ParasiteLoseHostEvent args)
     {
         _actions.AddAction(uid, ref component.InfectHostActionEntity, component.InfectHostAction);
+        _actions.RemoveAction(component.makeDrunkActionEntity);
+
         _actions.SetCooldown(component.InfectHostActionEntity, component.LoseHostInfestCooldownTime);
     }
 }

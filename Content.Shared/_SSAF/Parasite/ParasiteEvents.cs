@@ -9,6 +9,10 @@ public sealed partial class ParasiteInfectHostActionEvent : EntityTargetActionEv
 {
 }
 
+public sealed partial class ParasiteMakeDrunkActionEvent : InstantActionEvent
+{
+}
+
 public sealed partial class ParasiteLoseHostEvent : EntityEventArgs
 {
 }

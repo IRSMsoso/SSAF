@@ -106,3 +106,15 @@
       state: icon
     event: !type:ParasiteInfectHostActionEvent
     priority: 3
+
+- type: entity
+  id: ActionMakeDrunk
+  name: Make Drunk
+  description: Dump a synthetic ethanol agent into your host, causing them to experience drunk-like symptoms
+  components:
+  - type: InstantAction
+    icon:
+      sprite: Objects/Consumable/Drinks/rumbottle.rsi
+      state: icon
+    event: !type:ParasiteMakeDrunkActionEvent
+    priority: 1
