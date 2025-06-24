@@ -5,9 +5,10 @@
   parent: MarkerBase
   components:
   - type: GhostRole
-    name: The Parasite
+    name: Parasite
     description: Infect a host, feed, then spread your young
     rules: ghost-role-information-freeagent-rules
+    allowSpeech: false
     mindRoles:
     - MindRoleGhostRoleFreeAgent
     raffle:
