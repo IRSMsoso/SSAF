@@ -30,6 +30,7 @@ public sealed class ParasiteSystem : EntitySystem
         SubscribeLocalEvent<ParasiteComponent, ComponentRemove>(OnComponentRemove);
         SubscribeLocalEvent<ParasiteComponent, ParasiteInfectHostActionEvent>(OnInfectHost);
         SubscribeLocalEvent<ParasiteComponent, InfectHostDoAfterEvent>(OnDoAfterInfestHost);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteLoseHostEvent>(OnLoseHost);
     }
 
     private void OnComponentRemove(EntityUid uid, ParasiteComponent component, ComponentRemove args)
@@ -44,17 +45,18 @@ public sealed class ParasiteSystem : EntitySystem
 
     private void OnInfectHost(EntityUid uid, ParasiteComponent component, ParasiteInfectHostActionEvent args)
     {
-        _popup.PopupEntity("You start worming your way under your target's skin", uid, uid);
+        if (!_doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager,
+                uid,
+                component.InfectTime,
+                new InfectHostDoAfterEvent(),
+                uid,
+                args.Target)
+            {
+                BreakOnMove = true,
+            }))
+            return;
 
-        _doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager,
-            uid,
-            component.InfectTime,
-            new InfectHostDoAfterEvent(),
-            uid,
-            args.Target)
-        {
-            BreakOnMove = true,
-        });
+        _popup.PopupEntity("You start worming your way under your target's skin", uid, uid);
     }
 
     private void OnDoAfterInfestHost(EntityUid uid, ParasiteComponent component, InfectHostDoAfterEvent args)
@@ -82,5 +84,12 @@ public sealed class ParasiteSystem : EntitySystem
         }
 
         _popup.PopupEntity("You worm your way into your new host", uid, uid);
+        _actions.RemoveAction(component.InfectHostActionEntity);
+    }
+
+    private void OnLoseHost(EntityUid uid, ParasiteComponent component, ParasiteLoseHostEvent args)
+    {
+        _actions.AddAction(uid, ref component.InfectHostActionEntity, component.InfectHostAction);
+        _actions.SetCooldown(component.InfectHostActionEntity, component.LoseHostInfestCooldownTime);
     }
 }

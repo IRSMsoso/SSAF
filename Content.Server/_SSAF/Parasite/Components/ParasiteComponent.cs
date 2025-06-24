@@ -15,6 +15,10 @@ public sealed partial class ParasiteComponent : Component
     [DataField("infectHostAction", customTypeSerializer: typeof(PrototypeIdSerializer<EntityPrototype>))]
     public string InfectHostAction = "ActionInfectHost";
 
-    [DataField("devourTime")]
-    public float InfectTime = 5f;
+    [DataField("infestTime")]
+    public TimeSpan InfectTime = TimeSpan.FromSeconds(5);
+
+    [DataField("loseHostInfestCooldownTime")]
+    public TimeSpan LoseHostInfestCooldownTime = TimeSpan.FromSeconds(60);
 }
+
