@@ -105,5 +105,4 @@
       sprite: _SSAF/Mobs/parasite.rsi
       state: icon
     event: !type:ParasiteInfectHostActionEvent
-    useDelay: 1
     priority: 3
