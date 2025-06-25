@@ -16,19 +16,22 @@ public sealed partial class ParasiteComponent : Component
     public EntityUid? InfectHostActionEntity;
 
     [DataField("infectHostAction", customTypeSerializer: typeof(PrototypeIdSerializer<EntityPrototype>))]
-    public string InfectHostAction = "ActionInfectHost";
-
-    [DataField("makeDrunkActionEntity")]
-    public EntityUid? makeDrunkActionEntity;
-
-    [DataField("makeDrunkAction", customTypeSerializer: typeof(PrototypeIdSerializer<EntityPrototype>))]
-    public string makeDrunkAction = "ActionMakeDrunk";
+    public string InfectHostAction = "ActionParasiteInfectHost";
 
     [DataField("escapeActionEntity")]
-    public EntityUid? escapeActionEntity;
+    public EntityUid? EscapeActionEntity;
 
     [DataField("escapeAction", customTypeSerializer: typeof(PrototypeIdSerializer<EntityPrototype>))]
-    public string escapeAction = "ActionEscape";
+    public string EscapeAction = "ActionParasiteEscape";
+
+    [DataField]
+    public EntProtoId MakeDrunkAction = "ActionMakeDrunk";
+
+    [DataField]
+    public EntProtoId ShopAction = "ActionParasiteOpenShop";
+
+    [DataField, AutoNetworkedField]
+    public EntityUid? ShopActionEntity;
 
     [DataField("infestTime")]
     public TimeSpan InfectTime = TimeSpan.FromSeconds(5);
@@ -36,17 +39,17 @@ public sealed partial class ParasiteComponent : Component
     [DataField("escapeTime")]
     public TimeSpan EscapeTime = TimeSpan.FromSeconds(3);
 
-    [DataField("loseHostInfestCooldownTime")]
-    public TimeSpan LoseHostInfestCooldownTime = TimeSpan.FromSeconds(2); // 60
-
-    [DataField("makeDrunkTime")]
-    public TimeSpan makeDrunkTime = TimeSpan.FromSeconds(90);
+    [DataField("hostInfestCooldownTime")]
+    public TimeSpan HostInfestCooldownTime = TimeSpan.FromSeconds(2); // 60
 
     [DataField("makeDrunkCooldownTime")]
-    public TimeSpan makeDrunkCooldownTime = TimeSpan.FromSeconds(2); // 480
+    public TimeSpan MakeDrunkCooldownTime = TimeSpan.FromSeconds(2); // 480
 
-    [DataField("energy")]
-    public float Energy = 0.0f;
+    [DataField("makeDrunkTime")]
+    public TimeSpan MakeDrunkTime = TimeSpan.FromSeconds(90);
+
+    [DataField("integration")]
+    public float Integration = 0.0f;
 
     [DataField, AutoNetworkedField]
     public ProtoId<EmotePrototype> ScreamEmote = "Scream";

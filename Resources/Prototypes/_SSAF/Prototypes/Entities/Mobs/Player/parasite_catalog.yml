@@ -1,0 +1,20 @@
+- type: storeCategory
+  id: ParasiteReagentsCategory
+  name: Reagents
+
+- type: storeCategory
+  id: ParasiteEmotionCategory
+  name: Emotion
+
+- type: listing
+  id: ParasiteEvolveMakeDrunk
+  name: parasite-make-drunk-name
+  description: parasite-make-drunk-desc
+  productAction: ActionParasiteMakeDrunk
+  cost:
+    ParasiteEnergy: 5
+  categories:
+  - ParasiteReagentsCategory
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
