@@ -35,6 +35,17 @@ using Robust.Shared.Timing;
 
 namespace Content.Server._SSAF.Parasite;
 
+public enum Emotion
+{
+    Anger,
+    Fear,
+    Bliss,
+    Despair,
+    Disgust,
+    Emptiness,
+    Confusion,
+}
+
 /// <summary>
 /// This handles...
 /// </summary>
@@ -71,7 +82,17 @@ public sealed class ParasiteSystem : EntitySystem
         SubscribeLocalEvent<ParasiteComponent, ParasiteInfectHostActionEvent>(OnInfectHost);
         SubscribeLocalEvent<ParasiteComponent, ParasiteMakeDrunkActionEvent>(OnMakeDrunk);
         SubscribeLocalEvent<ParasiteComponent, ParasiteEscapeActionEvent>(OnEscape);
-        SubscribeLocalEvent<ParasiteComponent, ParasiteShopActionEvent>(OnShop);
+
+        // Emotion actions
+        SubscribeLocalEvent<ParasiteComponent, ParasiteAffectEmotionAngerActionEvent>(OnAnger);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteAffectEmotionFearActionEvent>(OnFear);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteAffectEmotionBlissActionEvent>(OnBliss);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteAffectEmotionDespairActionEvent>(OnDespair);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteAffectEmotionDisgustActionEvent>(OnDisgust);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteAffectEmotionEmptinessActionEvent>(OnEmptiness);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteAffectEmotionConfusionActionEvent>(OnConfusion);
+
+        // SubscribeLocalEvent<ParasiteComponent, ParasiteShopActionEvent>(OnShop);
 
         SubscribeLocalEvent<ParasiteComponent, InfectHostDoAfterEvent>(OnDoAfterInfestHost);
         SubscribeLocalEvent<ParasiteComponent, ParasiteEscapeDoAfterEvent>(OnDoAfterEscape);
@@ -243,7 +264,7 @@ public sealed class ParasiteSystem : EntitySystem
     private void OnInit(EntityUid uid, ParasiteComponent component, MapInitEvent args)
     {
         _actions.AddAction(uid, ref component.InfectHostActionEntity, component.InfectHostAction);
-        _actions.AddAction(uid, ref component.ShopActionEntity, component.ShopAction);
+        // _actions.AddAction(uid, ref component.ShopActionEntity, component.ShopAction);
 
     }
 
@@ -291,13 +312,59 @@ public sealed class ParasiteSystem : EntitySystem
 
     }
 
-    private void OnShop(EntityUid uid, ParasiteComponent component, ParasiteShopActionEvent args)
-    {
-        if (!TryComp<StoreComponent>(uid, out var store))
-            return;
+    #region Emotions
 
-        _store.ToggleUi(args.Performer, uid, store);
+    private void OnAnger(EntityUid uid, ParasiteComponent component, ParasiteAffectEmotionAngerActionEvent args)
+    {
+        SwitchEmotion(uid, component, Emotion.Anger);
     }
+
+    private void OnFear(EntityUid uid, ParasiteComponent component, ParasiteAffectEmotionFearActionEvent args)
+    {
+        SwitchEmotion(uid, component, Emotion.Fear);
+    }
+
+    private void OnBliss(EntityUid uid, ParasiteComponent component, ParasiteAffectEmotionBlissActionEvent args)
+    {
+        SwitchEmotion(uid, component, Emotion.Bliss);
+    }
+
+    private void OnDespair(EntityUid uid, ParasiteComponent component, ParasiteAffectEmotionDespairActionEvent args)
+    {
+        SwitchEmotion(uid, component, Emotion.Despair);
+    }
+
+    private void OnDisgust(EntityUid uid, ParasiteComponent component, ParasiteAffectEmotionDisgustActionEvent args)
+    {
+        SwitchEmotion(uid, component, Emotion.Disgust);
+    }
+
+    private void OnEmptiness(EntityUid uid, ParasiteComponent component, ParasiteAffectEmotionEmptinessActionEvent args)
+    {
+        SwitchEmotion(uid, component, Emotion.Emptiness);
+    }
+
+    private void OnConfusion(EntityUid uid, ParasiteComponent component, ParasiteAffectEmotionConfusionActionEvent args)
+    {
+        _chat.TrySendInGameOOCMessage(uid, "You suddenly feel completely and utterly confused", InGameOOCChatType.Looc, false);
+        SwitchEmotion(uid, component, Emotion.Confusion);
+    }
+
+    private void SwitchEmotion(EntityUid uid, ParasiteComponent component, Emotion newEmotion)
+    {
+        component.CurrentEmotion = newEmotion;
+        component.AffectEmotionUntil = _timing.CurTime + TimeSpan.FromSeconds(50);
+    }
+
+    #endregion
+
+    // private void OnShop(EntityUid uid, ParasiteComponent component, ParasiteShopActionEvent args)
+    // {
+    //     if (!TryComp<StoreComponent>(uid, out var store))
+    //         return;
+    //
+    //     _store.ToggleUi(args.Performer, uid, store);
+    // }
 
     private void OnDoAfterInfestHost(EntityUid uid, ParasiteComponent component, InfectHostDoAfterEvent args)
     {
@@ -326,6 +393,13 @@ public sealed class ParasiteSystem : EntitySystem
         _popup.PopupEntity("You worm your way into your new host", uid, uid);
         _actions.RemoveAction(component.InfectHostActionEntity);
         _actions.AddAction(uid, ref component.EscapeActionEntity, component.EscapeAction);
+        _actions.AddAction(uid, ref component.AngerActionEntity, component.AngerAction);
+        _actions.AddAction(uid, ref component.FearActionEntity, component.FearAction);
+        _actions.AddAction(uid, ref component.BlissActionEntity, component.BlissAction);
+        _actions.AddAction(uid, ref component.DespairActionEntity, component.DespairAction);
+        _actions.AddAction(uid, ref component.DisgustActionEntity, component.DisgustAction);
+        _actions.AddAction(uid, ref component.EmptinessActionEntity, component.EmptinessAction);
+        _actions.AddAction(uid, ref component.ConfusionActionEntity, component.ConfusionAction);
     }
 
     private void OnDoAfterEscape(EntityUid uid, ParasiteComponent component, ParasiteEscapeDoAfterEvent args)
@@ -348,6 +422,13 @@ public sealed class ParasiteSystem : EntitySystem
     {
         _actions.AddAction(uid, ref component.InfectHostActionEntity, component.InfectHostAction);
         _actions.RemoveAction(component.EscapeActionEntity);
+        _actions.RemoveAction(component.AngerActionEntity);
+        _actions.RemoveAction(component.FearActionEntity);
+        _actions.RemoveAction(component.BlissActionEntity);
+        _actions.RemoveAction(component.DespairActionEntity);
+        _actions.RemoveAction(component.DisgustActionEntity);
+        _actions.RemoveAction(component.EmptinessActionEntity);
+        _actions.RemoveAction(component.ConfusionActionEntity);
 
         _actions.SetCooldown(component.InfectHostActionEntity, component.HostInfestCooldownTime);
 
