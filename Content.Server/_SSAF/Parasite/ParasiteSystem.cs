@@ -4,24 +4,34 @@ using Content.Server.Body.Systems;
 using Content.Server.Chat.Systems;
 using Content.Server.DoAfter;
 using Content.Server.Drunk;
+using Content.Server.Jittering;
 using Content.Server.Medical;
 using Content.Server.Popups;
+using Content.Server.Speech.EntitySystems;
 using Content.Server.Store.Systems;
 using Content.Server.Stunnable;
 using Content.Shared._Shitmed.Targeting;
 using Content.Shared._SSAF.Parasite;
 using Content.Shared.Actions;
 using Content.Shared.Body.Systems;
+using Content.Shared.Chat.Prototypes;
 using Content.Shared.Coordinates;
 using Content.Shared.Damage;
 using Content.Shared.DoAfter;
+using Content.Shared.FixedPoint;
 using Content.Shared.Gibbing.Events;
+using Content.Shared.Gibbing.Systems;
 using Content.Shared.Movement.Systems;
+using Content.Shared.Nutrition.Components;
+using Content.Shared.Nutrition.EntitySystems;
 using Content.Shared.Popups;
 using Content.Shared.Store.Components;
 using Robust.Server.Containers;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
+using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
+using Robust.Shared.Timing;
 
 namespace Content.Server._SSAF.Parasite;
 
@@ -42,6 +52,12 @@ public sealed class ParasiteSystem : EntitySystem
     [Dependency] private readonly StoreSystem _store = default!;
     [Dependency] private readonly VomitSystem _vomit = default!;
     [Dependency] private readonly StunSystem _stun = default!;
+    [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly HungerSystem _hunger = default!;
+    [Dependency] private readonly IRobustRandom _random = default!;
+    [Dependency] private readonly JitteringSystem _jittering = default!;
+    [Dependency] private readonly GibbingSystem _gibbing = default!;
+    [Dependency] private readonly StutteringSystem _stuttering = default!;
 
 
     /// <inheritdoc/>
@@ -60,6 +76,147 @@ public sealed class ParasiteSystem : EntitySystem
         SubscribeLocalEvent<ParasiteComponent, InfectHostDoAfterEvent>(OnDoAfterInfestHost);
         SubscribeLocalEvent<ParasiteComponent, ParasiteEscapeDoAfterEvent>(OnDoAfterEscape);
         SubscribeLocalEvent<ParasiteComponent, ParasiteLoseHostEvent>(OnLoseHost);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        var query = EntityQueryEnumerator<ParasiteComponent>();
+        while (query.MoveNext(out var uid, out var parasite))
+        {
+            if (_timing.CurTime < parasite.NextUpdateTime)
+                continue;
+            parasite.NextUpdateTime = _timing.CurTime + parasite.UpdateRate;
+
+            if (!_container.TryGetContainingContainer(uid, out var container))
+                continue;
+
+            var previousHungerStolen = parasite.HungerStolen;
+
+            StealHunger(uid, container.Owner, parasite);
+
+
+            if (JustReachedValue(200f, previousHungerStolen, parasite.HungerStolen))
+            {
+                _popup.PopupEntity("Something feels wrong", container.Owner, container.Owner, PopupType.Medium);
+            }
+
+            if (JustReachedValue(400f, previousHungerStolen, parasite.HungerStolen))
+            {
+                _popup.PopupEntity("I've been feeling hungrier than usual", container.Owner, container.Owner, PopupType.Medium);
+            }
+
+            if (JustReachedValue(600f, previousHungerStolen, parasite.HungerStolen))
+            {
+                _popup.PopupEntity("I feel nauseous", container.Owner, container.Owner, PopupType.MediumCaution);
+            }
+
+            if (JustReachedValue(800f, previousHungerStolen, parasite.HungerStolen))
+            {
+                _popup.PopupEntity("I'm so hungry all of the time", container.Owner, container.Owner, PopupType.Medium);
+                _popup.PopupEntity("You are halfway to emerging", uid, uid, PopupType.Large);
+            }
+
+            if (JustReachedValue(1000f, previousHungerStolen, parasite.HungerStolen))
+            {
+                _popup.PopupEntity("I haven't felt like myself", container.Owner, container.Owner, PopupType.Medium);
+            }
+
+            if (JustReachedValue(1200f, previousHungerStolen, parasite.HungerStolen))
+            {
+                _popup.PopupEntity("Something is definitely very wrong", container.Owner, container.Owner, PopupType.MediumCaution);
+            }
+
+            if (JustReachedValue(1400f, previousHungerStolen, parasite.HungerStolen))
+            {
+                _popup.PopupEntity("Something is inside of me", container.Owner, container.Owner, PopupType.LargeCaution);
+                _popup.PopupEntity("You will emerge soon", uid, uid, PopupType.Large);
+            }
+
+            if (Between(parasite.HungerStolen, 1400f, 1450f))
+            {
+                ThoughtWithProbability("Oh god, my insides hurt", container.Owner, 0.1f, PopupType.LargeCaution);
+            }
+
+            if (Between(parasite.HungerStolen, 1450f, 1500))
+            {
+                _stun.TryParalyze(container.Owner, TimeSpan.FromSeconds(2f), true);
+                _jittering.DoJitter(container.Owner, TimeSpan.FromSeconds(2f), true, 1.0f, 10.0f);
+                _stuttering.DoStutter(container.Owner, TimeSpan.FromSeconds(2f), true);
+                ThoughtWithProbability("Everything hurts", container.Owner, 0.2f, PopupType.LargeCaution);
+                EmoteWithProbability(container.Owner, parasite.ScreamEmote, 0.2f);
+            }
+
+            if (Between(parasite.HungerStolen, 1400f, 1500))
+            {
+                _bloodstream.TryModifyBleedAmount(container.Owner, 10f);
+            }
+
+            if (parasite.HungerStolen >= 1500)
+            {
+                // Consume host
+                _damageable.TryChangeDamage(container.Owner,
+                    new DamageSpecifier()
+                    {
+                        DamageDict = new Dictionary<string, FixedPoint2>
+                        {
+                            { "Blunt", 800 },
+                        }
+                    },
+                    true);
+                _popup.PopupCoordinates("A parasite bursts out!", uid.ToCoordinates(), PopupType.LargeCaution);
+            }
+        }
+    }
+
+    private static bool Between(float number, float min, float max)
+    {
+        return number >= min && number <= max;
+    }
+
+    private static bool JustReachedValue(float value, float previous, float current)
+    {
+        return current >= value && previous < value;
+    }
+
+    private void ThoughtWithProbability(string message, EntityUid uid, float probability, PopupType popupType = PopupType.Medium)
+    {
+        if (_random.Prob(probability))
+        {
+            _popup.PopupEntity(message, uid, uid, popupType);
+        }
+    }
+
+    private void EmoteWithProbability(EntityUid uid, ProtoId<EmotePrototype> emote, float probability)
+    {
+        if (_random.Prob(probability))
+        {
+            _chat.TryEmoteWithChat(uid, emote);
+        }
+    }
+
+    private void StealHunger(EntityUid parasiteUid, EntityUid hostUid, ParasiteComponent parasite)
+    {
+        if (!TryComp<HungerComponent>(parasiteUid, out var parasiteHungerComp))
+            return;
+
+        if (!TryComp<HungerComponent>(hostUid, out var hostHungerComp))
+            return;
+
+        if (_hunger.GetHunger(parasiteHungerComp) >= 150.0f)
+            return;
+
+        if (_hunger.GetHunger(hostHungerComp) < 10.0f)
+        {
+            ThoughtWithProbability("You feel extremely hungry", hostUid, 0.1f);
+            parasite.HungerStolen += 0.1f;
+            return;
+        }
+
+        _hunger.ModifyHunger(hostUid, -1.0f, hostHungerComp);
+        _hunger.ModifyHunger(parasiteUid, 1.0f, parasiteHungerComp);
+        parasite.HungerStolen += 1.0f;
     }
 
     private void OnComponentRemove(EntityUid uid, ParasiteComponent component, ComponentRemove args)
@@ -113,7 +270,7 @@ public sealed class ParasiteSystem : EntitySystem
 
         _drunkSpike.TryDrunkSpike(container.Owner, component.MakeDrunkTime);
 
-        _popup.PopupEntity( "You feel woozy all of a sudden", container.Owner, container.Owner);
+        _popup.PopupEntity( "You suddenly feel extremely intoxicated", container.Owner, container.Owner, PopupType.Medium);
     }
 
     private void OnEscape(EntityUid uid, ParasiteComponent component, ParasiteEscapeActionEvent args)
@@ -193,5 +350,7 @@ public sealed class ParasiteSystem : EntitySystem
         _actions.RemoveAction(component.EscapeActionEntity);
 
         _actions.SetCooldown(component.InfectHostActionEntity, component.HostInfestCooldownTime);
+
+        component.HungerStolen = 0f;
     }
 }
