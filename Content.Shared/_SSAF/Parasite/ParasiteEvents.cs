@@ -33,3 +33,32 @@ public sealed partial class InfectHostDoAfterEvent : SimpleDoAfterEvent { }
 public sealed partial class ParasiteShopActionEvent : InstantActionEvent
 {
 }
+
+
+public sealed partial class ParasiteAffectEmotionAngerActionEvent : InstantActionEvent
+{
+}
+
+public sealed partial class ParasiteAffectEmotionFearActionEvent : InstantActionEvent
+{
+}
+
+public sealed partial class ParasiteAffectEmotionBlissActionEvent : InstantActionEvent
+{
+}
+
+public sealed partial class ParasiteAffectEmotionDespairActionEvent : InstantActionEvent
+{
+}
+
+public sealed partial class ParasiteAffectEmotionDisgustActionEvent : InstantActionEvent
+{
+}
+
+public sealed partial class ParasiteAffectEmotionEmptinessActionEvent : InstantActionEvent
+{
+}
+
+public sealed partial class ParasiteAffectEmotionConfusionActionEvent : InstantActionEvent
+{
+}

@@ -14,52 +14,55 @@ namespace Content.Server._SSAF.Parasite.Components;
 [AutoGenerateComponentPause]
 public sealed partial class ParasiteComponent : Component
 {
-    [DataField("infectHostActionEntity")]
+    [DataField]
     public EntityUid? InfectHostActionEntity;
 
-    [DataField("infectHostAction", customTypeSerializer: typeof(PrototypeIdSerializer<EntityPrototype>))]
-    public string InfectHostAction = "ActionParasiteInfectHost";
+    [DataField]
+    public EntProtoId InfectHostAction = "ActionParasiteInfectHost";
 
-    [DataField("escapeActionEntity")]
+    [DataField]
     public EntityUid? EscapeActionEntity;
 
-    [DataField("escapeAction", customTypeSerializer: typeof(PrototypeIdSerializer<EntityPrototype>))]
-    public string EscapeAction = "ActionParasiteEscape";
+    [DataField]
+    public EntProtoId EscapeAction = "ActionParasiteEscape";
 
     [DataField]
     public EntProtoId MakeDrunkAction = "ActionMakeDrunk";
 
     [DataField]
-    public EntProtoId ShopAction = "ActionParasiteOpenShop";
+    public EntityUid? MakeDrunkActionEntity;
 
-    [DataField, AutoNetworkedField]
-    public EntityUid? ShopActionEntity;
+    // [DataField]
+    // public EntProtoId ShopAction = "ActionParasiteOpenShop";
+    //
+    // [DataField, AutoNetworkedField]
+    // public EntityUid? ShopActionEntity;
 
-    [DataField("infestTime")]
+    [DataField]
     public TimeSpan InfectTime = TimeSpan.FromSeconds(5);
 
-    [DataField("escapeTime")]
+    [DataField]
     public TimeSpan EscapeTime = TimeSpan.FromSeconds(3);
 
-    [DataField("hostInfestCooldownTime")]
+    [DataField]
     public TimeSpan HostInfestCooldownTime = TimeSpan.FromSeconds(2); // 60
 
-    [DataField("escapeCooldownTime")]
+    [DataField]
     public TimeSpan EscapeCooldownTime = TimeSpan.FromSeconds(2); // 40
 
-    [DataField("makeDrunkCooldownTime")]
+    [DataField]
     public TimeSpan MakeDrunkCooldownTime = TimeSpan.FromSeconds(2); // 480
 
-    [DataField("makeDrunkTime")]
+    [DataField]
     public TimeSpan MakeDrunkTime = TimeSpan.FromSeconds(90);
 
-    [DataField("escapeHostParalyzeTime")]
+    [DataField]
     public TimeSpan EscapeHostParalyzeTime = TimeSpan.FromSeconds(4);
 
     [DataField, AutoNetworkedField]
     public ProtoId<EmotePrototype> ScreamEmote = "Scream";
 
-    [DataField("escapeDamage")]
+    [DataField]
     public DamageSpecifier EscapeDamage = new DamageSpecifier()
     {
         DamageDict = new()
@@ -96,6 +99,90 @@ public sealed partial class ParasiteComponent : Component
 
     [DataField("hungerStolen")]
     public float HungerStolen = 0.0f;
+
+    #endregion
+
+    #region Emotions
+
+    #region Anger
+
+    [DataField]
+    public EntProtoId AngerAction = "ActionParasiteAffectEmotionAnger";
+
+    [DataField]
+    public EntityUid? AngerActionEntity;
+
+    #endregion
+
+    #region Fear
+
+    [DataField]
+    public EntProtoId FearAction = "ActionParasiteAffectEmotionFear";
+
+    [DataField]
+    public EntityUid? FearActionEntity;
+
+    #endregion
+
+    #region Bliss
+
+    [DataField]
+    public EntProtoId BlissAction = "ActionParasiteAffectEmotionBliss";
+
+    [DataField]
+    public EntityUid? BlissActionEntity;
+
+    #endregion
+
+    #region Despair
+
+    [DataField]
+    public EntProtoId DespairAction = "ActionParasiteAffectEmotionDespair";
+
+    [DataField]
+    public EntityUid? DespairActionEntity;
+
+    #endregion
+
+    #region Disgust
+
+    [DataField]
+    public EntProtoId DisgustAction = "ActionParasiteAffectEmotionDisgust";
+
+    [DataField]
+    public EntityUid? DisgustActionEntity;
+
+    #endregion
+
+    #region Emptiness
+
+    [DataField]
+    public EntProtoId EmptinessAction = "ActionParasiteAffectEmotionEmptiness";
+
+    [DataField]
+    public EntityUid? EmptinessActionEntity;
+
+    #endregion
+
+    #region Confusion
+
+    [DataField]
+    public EntProtoId ConfusionAction = "ActionParasiteAffectEmotionConfusion";
+
+    [DataField]
+    public EntityUid? ConfusionActionEntity;
+
+    #endregion
+
+
+    public Emotion CurrentEmotion;
+
+    /// <summary>
+    /// The time when the current emotional effect will end.
+    /// </summary>
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
+    [AutoPausedField]
+    public TimeSpan AffectEmotionUntil;
 
     #endregion
 }

@@ -81,20 +81,20 @@
       behaviors:
       - !type:GibBehavior { }
   - type: Parasite
-  - type: Store
-    name: Integrate Host
-    categories:
-    - ParasiteReagentsCategory
-    - ParasiteEmotionCategory
-    currencyWhitelist:
-    - ParasiteEnergy
-    balance:
-      ParasiteEnergy: 20
-  - type: UserInterface
-    interfaces:
-      enum.StoreUiKey.Key:
-        type: StoreBoundUserInterface
-        requireInputValidation: false
+#  - type: Store
+#    name: Integrate Host
+#    categories:
+#    - ParasiteReagentsCategory
+#    - ParasiteEmotionCategory
+#    currencyWhitelist:
+#    - ParasiteEnergy
+#    balance:
+#      ParasiteEnergy: 20
+#  - type: UserInterface
+#    interfaces:
+#      enum.StoreUiKey.Key:
+#        type: StoreBoundUserInterface
+#        requireInputValidation: false
 
 - type: currency
   id: ParasiteEnergy
@@ -115,6 +115,16 @@
     priority: 3
 
 - type: entity
+  id: ActionParasiteEscape
+  name: parasite-escape-name
+  description: parasite-escape-desc
+  components:
+  - type: InstantAction
+    icon: Interface/Actions/firestarter.png
+    event: !type:ParasiteEscapeActionEvent
+    priority: 1
+
+- type: entity
   id: ActionParasiteMakeDrunk
   name: parasite-make-drunk-name
   description: parasite-make-drunk-desc
@@ -127,22 +137,77 @@
     priority: 1
 
 - type: entity
-  id: ActionParasiteEscape
-  name: parasite-escape-name
-  description: parasite-escape-desc
+  id: ActionParasiteAffectEmotionAnger
+  name: "Affect Host Emotion: Anger"
+  description: Cause extreme anger in your host
   components:
   - type: InstantAction
-    icon: Interface/Actions/firestarter.png
-    event: !type:ParasiteEscapeActionEvent
+    event: !type:ParasiteAffectEmotionAngerActionEvent
     priority: 1
 
 - type: entity
-  id: ActionParasiteOpenShop
-  name: Integrate Host
-  description: Expand control over your host
+  id: ActionParasiteAffectEmotionFear
+  name: "Affect Host Emotion: Fear"
+  description: Cause extreme fear in your host
   components:
   - type: InstantAction
-    checkCanInteract: false
-    checkConsciousness: false
-    icon: Interface/Actions/shop.png
-    event: !type:ParasiteShopActionEvent
+    event: !type:ParasiteAffectEmotionFearActionEvent
+    priority: 1
+
+- type: entity
+  id: ActionParasiteAffectEmotionBliss
+  name: "Affect Host Emotion: Bliss"
+  description: Cause your host to feel completely at bliss
+  components:
+  - type: InstantAction
+    event: !type:ParasiteAffectEmotionBlissActionEvent
+    priority: 1
+
+- type: entity
+  id: ActionParasiteAffectEmotionDespair
+  name: "Affect Host Emotion: Despair"
+  description: Cause extreme despair in your host
+  components:
+  - type: InstantAction
+    event: !type:ParasiteAffectEmotionDespairActionEvent
+    priority: 1
+
+- type: entity
+  id: ActionParasiteAffectEmotionDisgust
+  name: "Affect Host Emotion: Disgust"
+  description: Cause extreme disgust in your host
+  components:
+  - type: InstantAction
+    event: !type:ParasiteAffectEmotionDisgustActionEvent
+    priority: 1
+
+- type: entity
+  id: ActionParasiteAffectEmotionEmptiness
+  name: "Affect Host Emotion: Emptiness"
+  description: Cause your host to feel completely empty
+  components:
+  - type: InstantAction
+    event: !type:ParasiteAffectEmotionEmptinessActionEvent
+    priority: 1
+
+- type: entity
+  id: ActionParasiteAffectEmotionConfusion
+  name: "Affect Host Emotion: Confusion"
+  description: Cause your host to become extremely confused
+  components:
+  - type: InstantAction
+    event: !type:ParasiteAffectEmotionConfusionActionEvent
+    priority: 1
+
+
+
+#- type: entity
+#  id: ActionParasiteOpenShop
+#  name: Integrate Host
+#  description: Expand control over your host
+#  components:
+#  - type: InstantAction
+#    checkCanInteract: false
+#    checkConsciousness: false
+#    icon: Interface/Actions/shop.png
+#    event: !type:ParasiteShopActionEvent
