@@ -13,6 +13,15 @@ public sealed partial class ParasiteMakeDrunkActionEvent : InstantActionEvent
 {
 }
 
+public sealed partial class ParasiteEscapeActionEvent : InstantActionEvent
+{
+}
+
+[Serializable, NetSerializable]
+public sealed partial class ParasiteEscapeDoAfterEvent : SimpleDoAfterEvent
+{
+}
+
 public sealed partial class ParasiteLoseHostEvent : EntityEventArgs
 {
 }

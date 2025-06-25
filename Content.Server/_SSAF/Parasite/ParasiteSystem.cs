@@ -1,12 +1,18 @@
 using Content.Server._SSAF.Parasite.Components;
+using Content.Server.Body.Systems;
+using Content.Server.Chat.Systems;
 using Content.Server.DoAfter;
 using Content.Server.Drunk;
 using Content.Server.Popups;
+using Content.Shared._Shitmed.Targeting;
 using Content.Shared._SSAF.Parasite;
 using Content.Shared.Actions;
 using Content.Shared.Coordinates;
+using Content.Shared.Damage;
 using Content.Shared.DoAfter;
+using Content.Shared.Popups;
 using Robust.Server.Containers;
+using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 
 namespace Content.Server._SSAF.Parasite;
@@ -20,10 +26,11 @@ public sealed class ParasiteSystem : EntitySystem
     [Dependency] private readonly PopupSystem _popup = default!;
     [Dependency] private readonly DoAfterSystem _doAfter = default!;
     [Dependency] private readonly ContainerSystem _container = default!;
-    [Dependency] private readonly DrunkSystem _drunk = default!;
     [Dependency] private readonly DrunkSpikeSystem _drunkSpike = default!;
-
-    private EntityQuery<ParasiteHostComponent> parasiteHostQuery;
+    [Dependency] private readonly ChatSystem _chat = default!;
+    [Dependency] private readonly DamageableSystem _damageable = default!;
+    [Dependency] private readonly BloodstreamSystem _bloodstream = default!;
+    [Dependency] private readonly SharedAudioSystem _audio = default!;
 
 
     /// <inheritdoc/>
@@ -33,7 +40,9 @@ public sealed class ParasiteSystem : EntitySystem
         SubscribeLocalEvent<ParasiteComponent, ComponentRemove>(OnComponentRemove);
         SubscribeLocalEvent<ParasiteComponent, ParasiteInfectHostActionEvent>(OnInfectHost);
         SubscribeLocalEvent<ParasiteComponent, ParasiteMakeDrunkActionEvent>(OnMakeDrunk);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteEscapeActionEvent>(OnEscape);
         SubscribeLocalEvent<ParasiteComponent, InfectHostDoAfterEvent>(OnDoAfterInfestHost);
+        SubscribeLocalEvent<ParasiteComponent, ParasiteEscapeDoAfterEvent>(OnDoAfterEscape);
         SubscribeLocalEvent<ParasiteComponent, ParasiteLoseHostEvent>(OnLoseHost);
     }
 
@@ -75,6 +84,24 @@ public sealed class ParasiteSystem : EntitySystem
         _popup.PopupEntity("You feel woozy all of a sudden", container.Owner, container.Owner);
     }
 
+    private void OnEscape(EntityUid uid, ParasiteComponent component, ParasiteEscapeActionEvent args)
+    {
+        if (!_container.TryGetContainingContainer(uid, out var container))
+            return;
+
+
+        if (!_doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager,
+                uid,
+                component.EscapeTime,
+                new ParasiteEscapeDoAfterEvent(),
+                uid)))
+            return;
+
+        // TODO: Cooldown
+        _popup.PopupEntity("You feel something thrashing inside you", container.Owner, container.Owner, PopupType.LargeCaution);
+
+    }
+
     private void OnDoAfterInfestHost(EntityUid uid, ParasiteComponent component, InfectHostDoAfterEvent args)
     {
         if (args.Handled || args.Cancelled)
@@ -102,12 +129,29 @@ public sealed class ParasiteSystem : EntitySystem
         _popup.PopupEntity("You worm your way into your new host", uid, uid);
         _actions.RemoveAction(component.InfectHostActionEntity);
         _actions.AddAction(uid, ref component.makeDrunkActionEntity, component.makeDrunkAction);
+        _actions.AddAction(uid, ref component.escapeActionEntity, component.escapeAction);
+    }
+
+    private void OnDoAfterEscape(EntityUid uid, ParasiteComponent component, ParasiteEscapeDoAfterEvent args)
+    {
+        if (args.Handled || args.Cancelled)
+            return;
+
+        if (!_container.TryGetContainingContainer(uid, out var container))
+            return;
+
+        _damageable.TryChangeDamage(container.Owner, component.EscapeDamage, true, true, null, uid, false, false, 1f, TargetBodyPart.Torso);
+        _bloodstream.TryModifyBleedAmount(container.Owner, component.EscapeBleed);
+        _audio.PlayPvs(component.EscapeSound, container.Owner.ToCoordinates());
+        _chat.TryEmoteWithChat(container.Owner, component.ScreamEmote);
+        RemComp<ParasiteHostComponent>(container.Owner);
     }
 
     private void OnLoseHost(EntityUid uid, ParasiteComponent component, ParasiteLoseHostEvent args)
     {
         _actions.AddAction(uid, ref component.InfectHostActionEntity, component.InfectHostAction);
         _actions.RemoveAction(component.makeDrunkActionEntity);
+        _actions.RemoveAction(component.escapeActionEntity);
 
         _actions.SetCooldown(component.InfectHostActionEntity, component.LoseHostInfestCooldownTime);
     }
