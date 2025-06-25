@@ -1,16 +1,22 @@
 using Content.Server._SSAF.Parasite.Components;
+using Content.Server.Body.Components;
 using Content.Server.Body.Systems;
 using Content.Server.Chat.Systems;
 using Content.Server.DoAfter;
 using Content.Server.Drunk;
+using Content.Server.Medical;
 using Content.Server.Popups;
 using Content.Server.Store.Systems;
+using Content.Server.Stunnable;
 using Content.Shared._Shitmed.Targeting;
 using Content.Shared._SSAF.Parasite;
 using Content.Shared.Actions;
+using Content.Shared.Body.Systems;
 using Content.Shared.Coordinates;
 using Content.Shared.Damage;
 using Content.Shared.DoAfter;
+using Content.Shared.Gibbing.Events;
+using Content.Shared.Movement.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Store.Components;
 using Robust.Server.Containers;
@@ -34,6 +40,8 @@ public sealed class ParasiteSystem : EntitySystem
     [Dependency] private readonly BloodstreamSystem _bloodstream = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly StoreSystem _store = default!;
+    [Dependency] private readonly VomitSystem _vomit = default!;
+    [Dependency] private readonly StunSystem _stun = default!;
 
 
     /// <inheritdoc/>
@@ -41,6 +49,8 @@ public sealed class ParasiteSystem : EntitySystem
     {
         SubscribeLocalEvent<ParasiteComponent, MapInitEvent>(OnInit);
         SubscribeLocalEvent<ParasiteComponent, ComponentRemove>(OnComponentRemove);
+
+        SubscribeLocalEvent<ParasiteComponent, BeingGibbedEvent>(OnGibbed);
 
         SubscribeLocalEvent<ParasiteComponent, ParasiteInfectHostActionEvent>(OnInfectHost);
         SubscribeLocalEvent<ParasiteComponent, ParasiteMakeDrunkActionEvent>(OnMakeDrunk);
@@ -55,6 +65,22 @@ public sealed class ParasiteSystem : EntitySystem
     private void OnComponentRemove(EntityUid uid, ParasiteComponent component, ComponentRemove args)
     {
         _container.TryRemoveFromContainer(uid);
+    }
+
+    private void OnGibbed(EntityUid uid, ParasiteComponent component, BeingGibbedEvent args)
+    {
+        if (!_container.TryGetContainingContainer(uid, out var container))
+            return;
+
+        if (!HasComp<ParasiteHostComponent>(container.Owner))
+            return;
+
+        _popup.PopupCoordinates(Loc.GetString("parasite-gibbed-in-host", ("mob", container.Owner)),
+            container.Owner.ToCoordinates(),
+            PopupType.LargeCaution);
+
+        _bloodstream.TryModifyBleedAmount(container.Owner, component.EscapeBleed);
+        _vomit.Vomit(container.Owner);
     }
 
     private void OnInit(EntityUid uid, ParasiteComponent component, MapInitEvent args)
@@ -103,7 +129,7 @@ public sealed class ParasiteSystem : EntitySystem
                 uid)))
             return;
 
-        // TODO: Cooldown
+        _actions.SetCooldown(component.EscapeActionEntity, component.EscapeCooldownTime);
         _popup.PopupEntity("You feel something thrashing inside you", container.Owner, container.Owner, PopupType.LargeCaution);
 
     }
@@ -157,6 +183,7 @@ public sealed class ParasiteSystem : EntitySystem
         _bloodstream.TryModifyBleedAmount(container.Owner, component.EscapeBleed);
         _audio.PlayPvs(component.EscapeSound, container.Owner.ToCoordinates());
         _chat.TryEmoteWithChat(container.Owner, component.ScreamEmote);
+        _stun.TryParalyze(container.Owner, component.EscapeHostParalyzeTime, true);
         RemComp<ParasiteHostComponent>(container.Owner);
     }
 

@@ -1,7 +1,9 @@
 using Content.Server._SSAF.Parasite.Components;
 using Content.Server.Body.Components;
+using Content.Server.Body.Systems;
 using Content.Server.Popups;
 using Content.Shared._SSAF.Parasite;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Coordinates;
 using Content.Shared.Popups;
 using Robust.Server.Containers;
@@ -17,6 +19,7 @@ public sealed class ParasiteHostSystem : EntitySystem
 
     [Dependency] private readonly PopupSystem _popup = default!;
     [Dependency] private readonly ContainerSystem _container = default!;
+    [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
 
     /// <inheritdoc/>
     public override void Initialize()

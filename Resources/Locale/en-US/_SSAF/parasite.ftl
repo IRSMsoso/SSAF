@@ -8,3 +8,5 @@ parasite-escape-name = Escape
 parasite-escape-desc = Rip your way out of your host as a last ditch effort to survive
 
 store-currency-display-parasite-energy = Energy
+
+parasite-gibbed-in-host = { CAPITALIZE(THE($mob)) } vomits a copious amount of blood
