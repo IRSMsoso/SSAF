@@ -52,15 +52,7 @@
       Peckish: 100
       Starving: 50
       Dead: 0
-    baseDecayRate: 0.105
-  - type: Thirst
-    thresholds:
-      OverHydrated: 600
-      Okay: 450
-      Thirsty: 300
-      Parched: 150
-      Dead: 0
-    baseDecayRate: 0.1
+    baseDecayRate: .8
   - type: GhostRole
     makeSentient: false
     name: Parasite
@@ -75,8 +67,6 @@
     tags:
     - CannotSuicide
   - type: NoSlip
-  - type: MobPrice
-    price: 5000
   - type: GuideHelp
     guides:
     - MinorAntagonists

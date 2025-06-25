@@ -6,8 +6,8 @@
   components:
   - type: GhostRole
     name: Parasite
-    description: Infect a host, feed, then spread your young
-    rules: ghost-role-information-freeagent-rules
+    description: Infect and consume as many hosts as you can
+    rules: ghost-role-information-antagonist-rules
     allowSpeech: false
     mindRoles:
     - MindRoleGhostRoleFreeAgent

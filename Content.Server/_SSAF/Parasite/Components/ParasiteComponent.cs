@@ -2,6 +2,7 @@ using Content.Shared.Chat.Prototypes;
 using Content.Shared.Damage;
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype;
 
 namespace Content.Server._SSAF.Parasite.Components;
@@ -10,6 +11,7 @@ namespace Content.Server._SSAF.Parasite.Components;
 /// Component data for the parasite.
 /// </summary>
 [RegisterComponent]
+[AutoGenerateComponentPause]
 public sealed partial class ParasiteComponent : Component
 {
     [DataField("infectHostActionEntity")]
@@ -51,9 +53,6 @@ public sealed partial class ParasiteComponent : Component
     [DataField("makeDrunkTime")]
     public TimeSpan MakeDrunkTime = TimeSpan.FromSeconds(90);
 
-    [DataField("integration")]
-    public float Integration = 0.0f;
-
     [DataField("escapeHostParalyzeTime")]
     public TimeSpan EscapeHostParalyzeTime = TimeSpan.FromSeconds(4);
 
@@ -78,5 +77,26 @@ public sealed partial class ParasiteComponent : Component
         {
             Params = AudioParams.Default.WithVolume(3f),
         };
+
+    #region Sustenance Stealing
+
+    /// <summary>
+    /// The time when the hunger threshold will update next.
+    /// </summary>
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
+    [AutoPausedField]
+    public TimeSpan NextUpdateTime;
+
+    /// <summary>
+    /// The time between each hunger threshold update.
+    /// </summary>
+    [ViewVariables(VVAccess.ReadWrite)]
+    [AutoNetworkedField]
+    public TimeSpan UpdateRate = TimeSpan.FromSeconds(1);
+
+    [DataField("hungerStolen")]
+    public float HungerStolen = 0.0f;
+
+    #endregion
 }
 
