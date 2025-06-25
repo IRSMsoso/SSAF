@@ -91,13 +91,30 @@
       behaviors:
       - !type:GibBehavior { }
   - type: Parasite
-    infectHostAction: ActionInfectHost
+  - type: Store
+    name: Integrate Host
+    categories:
+    - ParasiteReagentsCategory
+    - ParasiteEmotionCategory
+    currencyWhitelist:
+    - ParasiteEnergy
+    balance:
+      ParasiteEnergy: 20
+  - type: UserInterface
+    interfaces:
+      enum.StoreUiKey.Key:
+        type: StoreBoundUserInterface
+        requireInputValidation: false
 
+- type: currency
+  id: ParasiteEnergy
+  displayName: store-currency-display-parasite-energy
+  canWithdraw: false
 
 - type: entity
-  id: ActionInfectHost
-  name: Infect Host
-  description: Wriggle your way into a host
+  id: ActionParasiteInfectHost
+  name: parasite-infect-host-name
+  description: parasite-infect-host-desc
   components:
   - type: EntityTargetAction
     canTargetSelf: false
@@ -108,9 +125,9 @@
     priority: 3
 
 - type: entity
-  id: ActionMakeDrunk
-  name: Make Drunk
-  description: Dump a synthetic ethanol agent into your host, causing them to experience drunk-like symptoms
+  id: ActionParasiteMakeDrunk
+  name: parasite-make-drunk-name
+  description: parasite-make-drunk-desc
   components:
   - type: InstantAction
     icon:
@@ -120,13 +137,22 @@
     priority: 1
 
 - type: entity
-  id: ActionEscape
-  name: Escape
-  description: Rip your way out of your host as a last ditch effort to survive
+  id: ActionParasiteEscape
+  name: parasite-escape-name
+  description: parasite-escape-desc
   components:
   - type: InstantAction
-    icon:
-      sprite: Interface/Actions/firestarter.png
-      state: icon
+    icon: Interface/Actions/firestarter.png
     event: !type:ParasiteEscapeActionEvent
     priority: 1
+
+- type: entity
+  id: ActionParasiteOpenShop
+  name: Integrate Host
+  description: Expand control over your host
+  components:
+  - type: InstantAction
+    checkCanInteract: false
+    checkConsciousness: false
+    icon: Interface/Actions/shop.png
+    event: !type:ParasiteShopActionEvent

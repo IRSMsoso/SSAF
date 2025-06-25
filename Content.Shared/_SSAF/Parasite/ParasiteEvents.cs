@@ -29,3 +29,7 @@ public sealed partial class ParasiteLoseHostEvent : EntityEventArgs
 [Serializable, NetSerializable]
 public sealed partial class InfectHostDoAfterEvent : SimpleDoAfterEvent { }
 
+
+public sealed partial class ParasiteShopActionEvent : InstantActionEvent
+{
+}
