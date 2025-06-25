@@ -42,6 +42,9 @@ public sealed partial class ParasiteComponent : Component
     [DataField("hostInfestCooldownTime")]
     public TimeSpan HostInfestCooldownTime = TimeSpan.FromSeconds(2); // 60
 
+    [DataField("escapeCooldownTime")]
+    public TimeSpan EscapeCooldownTime = TimeSpan.FromSeconds(2); // 40
+
     [DataField("makeDrunkCooldownTime")]
     public TimeSpan MakeDrunkCooldownTime = TimeSpan.FromSeconds(2); // 480
 
@@ -50,6 +53,9 @@ public sealed partial class ParasiteComponent : Component
 
     [DataField("integration")]
     public float Integration = 0.0f;
+
+    [DataField("escapeHostParalyzeTime")]
+    public TimeSpan EscapeHostParalyzeTime = TimeSpan.FromSeconds(4);
 
     [DataField, AutoNetworkedField]
     public ProtoId<EmotePrototype> ScreamEmote = "Scream";

@@ -1,0 +1,11 @@
+- type: reaction
+  id: Parizoril
+  reactants:
+    Heparin:
+      amount: 1
+    Histamine:
+      amount: 1
+    FluorosulfuricAcid:
+      amount: 1
+  products:
+    Parizoril: 3

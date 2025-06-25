@@ -1,0 +1,66 @@
+- type: reagent
+  id: Parizoril
+  name: Parizoril
+  group: Medicine
+  desc: Anti-parasitic
+  physicalDesc: tingling
+  flavor: medicine
+  color: "#3fc1b8"
+  metabolisms:
+    Medicine:
+      metabolismRate: 0.1
+      effects:
+      - !type:ParasiteHealthChange
+        damage:
+          types:
+            Heat: 0.05
+            Cold: 0.05
+            Caustic: 0.05
+      - !type:HealthChange
+        damage:
+          types:
+            Asphyxiation: 1.5
+            Poison: 0.5
+      - !type:ChemVomit
+        probability: 0.05
+      - !type:Jitter
+        amplitude: 1.0
+        frequency: 10.0
+        conditions:
+        - !type:HasParasite
+      - !type:Jitter
+        conditions:
+        - !type:HasParasite
+          inverted: true
+      - !type:Stutter
+        conditions:
+        - !type:HasParasite
+      - !type:Paralyze
+        probability: 0.2
+        paralyzeTime: 5
+        conditions:
+        - !type:HasParasite
+      - !type:Drunk
+      - !type:Emote
+        emote: Scream
+        probability: 0.4
+        conditions:
+        - !type:HasParasite
+      - !type:PopupMessage
+        type: Local
+        visualType: LargeCaution
+        messages:
+        - "reagent-effect-parizol-personal1"
+        - "reagent-effect-parizol-personal2"
+        - "reagent-effect-parizol-personal3"
+        - "reagent-effect-parizol-personal4"
+        - "reagent-effect-parizol-personal5"
+        - "reagent-effect-parizol-personal6"
+        - "reagent-effect-parizol-personal7"
+        - "reagent-effect-parizol-personal8"
+        probability: 0.3
+        conditions:
+        - !type:HasParasite
+      - !type:MovespeedModifier
+        walkSpeedModifier: 0.3
+        runSpeedModifier: 0.3a
