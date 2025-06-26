@@ -27,7 +27,7 @@ public sealed partial class ParasiteComponent : Component
     public EntProtoId EscapeAction = "ActionParasiteEscape";
 
     [DataField]
-    public EntProtoId MakeDrunkAction = "ActionMakeDrunk";
+    public EntProtoId MakeDrunkAction = "ActionParasiteMakeDrunk";
 
     [DataField]
     public EntityUid? MakeDrunkActionEntity;
@@ -45,13 +45,13 @@ public sealed partial class ParasiteComponent : Component
     public TimeSpan EscapeTime = TimeSpan.FromSeconds(3);
 
     [DataField]
-    public TimeSpan HostInfestCooldownTime = TimeSpan.FromSeconds(2); // 60
+    public TimeSpan HostInfestCooldownTime = TimeSpan.FromSeconds(60); // 60
 
     [DataField]
-    public TimeSpan EscapeCooldownTime = TimeSpan.FromSeconds(2); // 40
+    public TimeSpan EscapeCooldownTime = TimeSpan.FromSeconds(40); // 40
 
     [DataField]
-    public TimeSpan MakeDrunkCooldownTime = TimeSpan.FromSeconds(2); // 480
+    public TimeSpan MakeDrunkCooldownTime = TimeSpan.FromSeconds(480); // 480
 
     [DataField]
     public TimeSpan MakeDrunkTime = TimeSpan.FromSeconds(90);
@@ -62,6 +62,9 @@ public sealed partial class ParasiteComponent : Component
     [DataField, AutoNetworkedField]
     public ProtoId<EmotePrototype> ScreamEmote = "Scream";
 
+    [DataField, AutoNetworkedField]
+    public ProtoId<EmotePrototype> CryingEmote = "Crying";
+
     [DataField]
     public DamageSpecifier EscapeDamage = new DamageSpecifier()
     {
@@ -71,12 +74,19 @@ public sealed partial class ParasiteComponent : Component
         }
     };
 
-    [DataField("escapeBleed")]
+    [DataField]
     public float EscapeBleed = 10.0f; // Max is 10 I guess?
 
-    [ViewVariables(VVAccess.ReadWrite), DataField("escapeSound")]
+    [DataField]
     public SoundSpecifier? EscapeSound =
         new SoundPathSpecifier("/Audio/Effects/gib2.ogg")
+        {
+            Params = AudioParams.Default.WithVolume(3f),
+        };
+
+    [DataField]
+    public SoundSpecifier? StartSound =
+        new SoundPathSpecifier("/Audio/_SSAF/parasite_intro.ogg")
         {
             Params = AudioParams.Default.WithVolume(3f),
         };
@@ -174,6 +184,17 @@ public sealed partial class ParasiteComponent : Component
 
     #endregion
 
+    public Dictionary<Emotion, string[]> _emotionThoughts = new Dictionary<Emotion, string[]>
+    {
+        { Emotion.Anger, ["I'm so angry", "I feel like I need to hit something", "God damnit", "FUCK", "Fuck everyone else"] },
+        { Emotion.Fear, ["What was that?", "Something's watching me", "They're onto me", "What was that noise?", "Why is that there?", "I gotta get out of here", "They're gonna kill me", "They're coming"] },
+        { Emotion.Bliss, ["Life is good", "I feel great", "I feel so at peace", "I am on a cloud", "Everything is so serene"] },
+        { Emotion.Despair, ["Everyone hates me", "It's my fault", "I let everyone down", "The world is a terrible place", "I am so unbelievably sad", "I feel unwell"] },
+        { Emotion.Disgust, ["I'm gonna be sick", "I'm gonna puke", "The world is spinning", "Don't touch me", "I feel so sick", "Everything is so gross"] },
+        { Emotion.Emptiness, ["I can't feel anything", "The world feels still", "Nothing ever happens", "Nothing matters"] },
+        { Emotion.Confusion, ["Where am I?", "Who am I?", "I can't remember", "What was I doing?", "I can't focus", "What day is it?", "Why am I here?", "Am I supposed to be here?"] },
+
+    };
 
     public Emotion CurrentEmotion;
 
@@ -183,6 +204,14 @@ public sealed partial class ParasiteComponent : Component
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
     [AutoPausedField]
     public TimeSpan AffectEmotionUntil;
+
+    [DataField]
+    public TimeSpan AffectEmotionTime = TimeSpan.FromSeconds(80);
+
+    [DataField]
+    public TimeSpan AffectEmotionCooldown = TimeSpan.FromMinutes(8);
+
+    public bool NotifiedEndEmotion = true;
 
     #endregion
 }
