@@ -6,12 +6,6 @@
     },
     "states": [
         {
-            "name": "critical"
-        },
-        {
-            "name": "dead"
-        },
-        {
             "name": "icon"
         },
         {

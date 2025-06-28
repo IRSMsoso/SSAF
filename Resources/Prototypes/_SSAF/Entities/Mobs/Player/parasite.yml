@@ -21,6 +21,7 @@
     factions:
     - SimpleHostile
   - type: Sprite
+    scale: "0.5, 0.5"
     drawdepth: SmallMobs
     sprite: _SSAF/Mobs/parasite.rsi
     layers:
