@@ -46,7 +46,7 @@ public sealed class IncapacitatorSystem : EntitySystem
 
     private void OnIncapacitate(EntityUid uid, IncapacitatorComponent component, IncapacitateActionEvent args)
     {
-        _popup.PopupEntity(Name(uid) + " goes limp", args.Target, PopupType.LargeCaution);
+        _popup.PopupEntity(Name(args.Target) + " goes limp", args.Target, PopupType.LargeCaution);
         _stun.TryParalyze(args.Target, TimeSpan.FromSeconds(8), true);
         _chat.TryEmoteWithoutChat(args.Target, component.GaspEmote, true);
         _audio.PlayPvs(component.AlienTalkSound, uid);
