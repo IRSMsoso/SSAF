@@ -50,5 +50,6 @@ public sealed class IncapacitatorSystem : EntitySystem
         _stun.TryParalyze(args.Target, TimeSpan.FromSeconds(8), true);
         _chat.TryEmoteWithoutChat(args.Target, component.GaspEmote, true);
         _audio.PlayPvs(component.AlienTalkSound, uid);
+        _actions.SetCooldown(component.IncapacitateActionEntity, TimeSpan.FromMinutes(2));
     }
 }
