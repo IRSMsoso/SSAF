@@ -1,0 +1,9 @@
+- type: entity
+  id: ActionIncapacitate
+  name: Incapacitate
+  description: Incapacitate a target for a short while
+  components:
+  - type: EntityTargetAction
+    canTargetSelf: false
+    event: !type:IncapacitateActionEvent
+    priority: 3
