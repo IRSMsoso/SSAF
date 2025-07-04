@@ -261,7 +261,7 @@ public sealed class ParasiteSystem : EntitySystem
                 _stun.TryParalyze(hostUid, TimeSpan.FromSeconds(2f), false);
             }
 
-            
+
             parasite.HungerStolen += 0.5f;
             return;
         }
@@ -391,6 +391,7 @@ public sealed class ParasiteSystem : EntitySystem
 
         _drunkSpike.TryDrunkSpike(container.Owner, component.MakeDrunkTime);
 
+        _actions.SetCooldown(component.MakeDrunkActionEntity, component.MakeDrunkCooldownTime);
         _popup.PopupEntity( "You suddenly feel extremely intoxicated", container.Owner, container.Owner, PopupType.Medium);
     }
 
@@ -562,6 +563,8 @@ public sealed class ParasiteSystem : EntitySystem
         _actions.AddAction(uid, ref component.DisgustActionEntity, component.DisgustAction);
         _actions.AddAction(uid, ref component.EmptinessActionEntity, component.EmptinessAction);
         _actions.AddAction(uid, ref component.ConfusionActionEntity, component.ConfusionAction);
+
+        _actions.SetCooldown(component.EscapeActionEntity, component.EscapeCooldownTime);
     }
 
     private void OnDoAfterEscape(EntityUid uid, ParasiteComponent component, ParasiteEscapeDoAfterEvent args)
